@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Table, Input, Layout } from "antd";
+import { Table, Input, Layout, Menu } from "antd";
 
 import axios from "axios";
 
 const App = () => {
   const [dataSource, setDataSource] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const { Header, Content, Footer } = Layout;
+  const { Header, Content, Footer, Sider } = Layout;
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const fetchNabData = async () => {
     try {
@@ -55,6 +56,20 @@ const App = () => {
     fetchBankData();
   }, []);
 
+  const handleMenuClick = (e) => {
+    const newSelectedCategory = e.key;
+    setSelectedCategory(newSelectedCategory);
+
+    if (newSelectedCategory === "all") {
+      fetchBankData();
+    } else {
+      const filteredData = dataSource.filter(
+        (item) => item.productCategory === newSelectedCategory
+      );
+      setDataSource(filteredData);
+    }
+  };
+
   const columns = [
     {
       title: "Product Category",
@@ -79,6 +94,11 @@ const App = () => {
       dataIndex: "brand",
       key: "brand",
     },
+    {
+      title: "Last Updated",
+      dataIndex: "lastUpdated",
+      key: "lastUpdated",
+    },
   ];
 
   return (
@@ -86,14 +106,18 @@ const App = () => {
       <Header
         style={{
           background: "#ffffff",
-          boxShadow: " 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)",        
-          
-
+          boxShadow:
+            " 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)",
         }}
       >
-       <div className="logo" style={{display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",}}>
+        <div
+          className="logo"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNV1Tr-PvO8PH5uh-fjsry0KgGBwUXSgORaw&s" // Replace with your logo path
             alt="Logo"
@@ -101,19 +125,34 @@ const App = () => {
           />
         </div>
       </Header>
-      <Content
-        className="site-layout"
-        style={{
-          padding: "50px 200px",
-        }}
-      >
-        <Input.Search
-          placeholder="Search"
-          style={{ marginBottom: 8 }}
-          onSearch={setSearchText}
-        />
-        <Table dataSource={dataSource} columns={columns} />
-      </Content>
+      <Layout>
+        <Sider style={{ background: "#fff" }}>
+          <Menu
+            mode="inline"
+            defaultSelectedKeys={["all"]}
+            style={{ height: "100%", borderRight: 0 }}
+            onClick={handleMenuClick}
+          >
+            <Menu.Item key="all">All Products</Menu.Item>
+            <Menu.Item key="BUSINESS_LOANS">Business Loans</Menu.Item>
+            {/* Add more menu items as needed */}
+          </Menu>
+        </Sider>
+        <Content
+          className="site-layout"
+          style={{
+            padding: "50px 200px",
+          }}
+        >
+          <Input.Search
+            placeholder="Search"
+            style={{ marginBottom: 8 }}
+            onSearch={setSearchText}
+          />
+          <Table dataSource={dataSource} columns={columns} />
+        </Content>
+      </Layout>
+
       <Footer
         style={{
           textAlign: "center",
